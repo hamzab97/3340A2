@@ -1,9 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
@@ -16,7 +14,6 @@ public class Main {
     public static void main(String[] args) {
         disjointSet = new DisjointSet();
         calculateDimensions("./src/girl.img");
-        System.out.println(disjointSet.final_sets());
     }
 
     /*
@@ -58,10 +55,12 @@ public class Main {
         try {
             File file = new File(image);
             Scanner myReader = new Scanner(file);
+            System.out.println("1. Input binary image");
             while (myReader.hasNextLine()) {
                 //calculate the dimensions of the input image
                 //the length and the width of the lines
                 String data = myReader.nextLine();
+                System.out.println(data);
                 length++;
                 width = data.length();
             }
@@ -105,17 +104,63 @@ public class Main {
                 index++;
             }
         }
+
+        //part b, question 2. Connected component image
+
+        System.out.println("Total number of connected components " + disjointSet.final_sets() + "\n");
+
+        index = 0;
+        System.out.println("Connected component image: ");
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < width; j++) {
+                if (matrix[i][j] == 1) {
+                    System.out.print(disjointSet.find_set(index).data + " ");
+                }
+                else {
+                    System.out.print(" 0");
+                }
+                index++;
+            }
+            System.out.println();
+        }
+
+        System.out.println("\nConnected components are (Component label=size of component):");
+        Stream<Map.Entry<Integer, Integer>> sorted_stream = sortedComponents(total_indices);
+        sorted_stream.forEach(s -> System.out.println(s));
+        System.out.println();
+
+        Stream<Integer> keys = sortedComponents(total_indices)
+                .filter(map -> map.getValue() >= 4)
+                .map(Map.Entry::getKey);
+
+        Set<Integer> keysSet = keys.collect(Collectors.toSet());
+
+        index = 0;
+        System.out.println("Connected component image with only components greater than 4: ");
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < width; j++) {
+                if (matrix[i][j] == 1 && keysSet.contains(disjointSet.find_set(index).data)) {
+                    System.out.print(disjointSet.find_set(index).data + " ");
+                }
+                else {
+                    System.out.print(" 0");
+                }
+                index++;
+            }
+            System.out.println();
+        }
     }
 
     private static Stream<Map.Entry<Integer, Integer>> sortedComponents(int total_index) {
         Map<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < total_index; i++) {
-            map.put(disjointSet.find_set(i).data, map.getOrDefault(disjointSet.find_set(i).data, 0) + 1);
+            if (disjointSet.find_set(i) != null){
+                map.put(disjointSet.find_set(i).data, map.getOrDefault(disjointSet.find_set(i).data, 0) + 1);
+            }
         }
-        Stream<Map.Entry<Integer, Integer>> sorted =
-                map.entrySet().stream()
-                        .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()));
-        return sorted;
+        return map.entrySet().stream().sorted(
+                Collections.reverseOrder(
+                        Map.Entry.comparingByValue()));
     }
 
 }

@@ -52,6 +52,9 @@ public class DisjointSet {
     }
 
     public Node find_set(int i) {
+        if (this.arr[i] == null) {
+            return null;
+        }
         this.arr[i].parent = this.arr[i].parent.parent;
         return this.arr[i].parent;
     }
