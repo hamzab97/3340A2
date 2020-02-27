@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
         disjointSet = new DisjointSet();
-        calculateDimensions("girl.img");
+        calculateDimensions(args[0]);
     }
 
     /*
